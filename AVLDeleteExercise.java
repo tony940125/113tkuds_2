@@ -1,36 +1,47 @@
-public class AVLBasicExercise {
+
+public class AVLDeleteExercise {
     static class Node {
-        int key, height;
+        int key, height = 1;
         Node left, right;
-        Node(int key) { this.key = key; height = 1; }
+        Node(int k) { key = k; }
     }
 
     Node root;
-
     int height(Node n) { return n == null ? 0 : n.height; }
 
     Node insert(Node node, int key) {
         if (node == null) return new Node(key);
         if (key < node.key) node.left = insert(node.left, key);
         else if (key > node.key) node.right = insert(node.right, key);
-        else return node; 
-
+        else return node;
         node.height = 1 + Math.max(height(node.left), height(node.right));
         return balance(node);
     }
 
-    boolean search(Node node, int key) {
-        if (node == null) return false;
-        if (key < node.key) return search(node.left, key);
-        if (key > node.key) return search(node.right, key);
-        return true;
+    Node delete(Node root, int key) {
+        if (root == null) return root;
+        if (key < root.key) root.left = delete(root.left, key);
+        else if (key > root.key) root.right = delete(root.right, key);
+        else {
+            if ((root.left == null) || (root.right == null)) {
+                Node temp = (root.left != null) ? root.left : root.right;
+                if (temp == null) root = null;
+                else root = temp;
+            } else {
+                Node temp = minValueNode(root.right);
+                root.key = temp.key;
+                root.right = delete(root.right, temp.key);
+            }
+        }
+        if (root == null) return root;
+        root.height = 1 + Math.max(height(root.left), height(root.right));
+        return balance(root);
     }
 
-    boolean isValidAVL(Node node) {
-        if (node == null) return true;
-        int bf = height(node.left) - height(node.right);
-        if (bf < -1 || bf > 1) return false;
-        return isValidAVL(node.left) && isValidAVL(node.right);
+    Node minValueNode(Node node) {
+        Node current = node;
+        while (current.left != null) current = current.left;
+        return current;
     }
 
     Node balance(Node node) {
@@ -71,12 +82,11 @@ public class AVLBasicExercise {
     }
 
     public static void main(String[] args) {
-        AVLBasicExercise avl = new AVLBasicExercise();
-        int[] keys = {10, 20, 30, 40, 50, 25};
+        AVLDeleteExercise avl = new AVLDeleteExercise();
+        int[] keys = {9,5,10,0,6,11,-1,1,2};
         for (int k : keys) avl.root = avl.insert(avl.root, k);
 
-        System.out.println("搜尋 25: " + avl.search(avl.root, 25));
-        System.out.println("高度: " + avl.height(avl.root));
-        System.out.println("是否有效 AVL: " + avl.isValidAVL(avl.root));
+        avl.root = avl.delete(avl.root, 10);
+        System.out.println("刪除 10 完成");
     }
 }

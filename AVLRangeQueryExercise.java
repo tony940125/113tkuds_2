@@ -1,36 +1,35 @@
-public class AVLBasicExercise {
+import java.util.*;
+
+public class AVLRangeQueryExercise {
     static class Node {
-        int key, height;
+        int key, height = 1;
         Node left, right;
-        Node(int key) { this.key = key; height = 1; }
+        Node(int k) { key = k; }
     }
 
     Node root;
-
     int height(Node n) { return n == null ? 0 : n.height; }
 
     Node insert(Node node, int key) {
         if (node == null) return new Node(key);
         if (key < node.key) node.left = insert(node.left, key);
         else if (key > node.key) node.right = insert(node.right, key);
-        else return node; 
-
+        else return node;
         node.height = 1 + Math.max(height(node.left), height(node.right));
         return balance(node);
     }
 
-    boolean search(Node node, int key) {
-        if (node == null) return false;
-        if (key < node.key) return search(node.left, key);
-        if (key > node.key) return search(node.right, key);
-        return true;
+    List<Integer> rangeQuery(Node node, int min, int max) {
+        List<Integer> res = new ArrayList<>();
+        rangeQueryHelper(node, min, max, res);
+        return res;
     }
 
-    boolean isValidAVL(Node node) {
-        if (node == null) return true;
-        int bf = height(node.left) - height(node.right);
-        if (bf < -1 || bf > 1) return false;
-        return isValidAVL(node.left) && isValidAVL(node.right);
+    void rangeQueryHelper(Node node, int min, int max, List<Integer> res) {
+        if (node == null) return;
+        if (node.key > min) rangeQueryHelper(node.left, min, max, res);
+        if (node.key >= min && node.key <= max) res.add(node.key);
+        if (node.key < max) rangeQueryHelper(node.right, min, max, res);
     }
 
     Node balance(Node node) {
@@ -71,12 +70,9 @@ public class AVLBasicExercise {
     }
 
     public static void main(String[] args) {
-        AVLBasicExercise avl = new AVLBasicExercise();
-        int[] keys = {10, 20, 30, 40, 50, 25};
+        AVLRangeQueryExercise avl = new AVLRangeQueryExercise();
+        int[] keys = {20,8,22,4,12,10,14};
         for (int k : keys) avl.root = avl.insert(avl.root, k);
-
-        System.out.println("搜尋 25: " + avl.search(avl.root, 25));
-        System.out.println("高度: " + avl.height(avl.root));
-        System.out.println("是否有效 AVL: " + avl.isValidAVL(avl.root));
+        System.out.println("範圍查詢 [10, 20]: " + avl.rangeQuery(avl.root, 10, 20));
     }
 }
